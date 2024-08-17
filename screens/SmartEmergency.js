@@ -11,31 +11,31 @@ import { ListItem } from "react-native-elements";
 import MyHeader from "../components/MyHeader";
 import db from "../config";
 import firebase from "firebase";
-export default class BookDonateScreen extends React.Component {
+export default class SmartEmegency extends React.Component {
   constructor() {
     super();
     this.state = {
-      requestedBooksList: [],
+      requestedSERSList: [],
     };
     this.requestRef = null;
   }
 
-  getRequestedBooksList = () => {
+  getRequestedSERSList = () => {
     this.requestRef = db
-      .collection("requested_books")
+      .collection("requested_SERS")
       .onSnapshot((snapshot) => {
-        var requestedBooksList = snapshot.docs.map((document) =>
+        var requestedSERSList = snapshot.docs.map((document) =>
           document.data()
         );
 
-        this.setState({ requestedBooksList: requestedBooksList });
-        //console.log(this.state.requestedBooksList);
+        this.setState({ requestedSERSList: requestedSERSList });
+        //console.log(this.state.requestedSERSList);
       });
-    //console.log(this.state.requestedBooksList);
+    //console.log(this.state.requestedSERSList);
   };
 
   componentDidMount() {
-    this.getRequestedBooksList();
+    this.getRequestedSERSList();
   }
 
   componentWillUnmount() {
@@ -47,7 +47,7 @@ export default class BookDonateScreen extends React.Component {
     return (
       <ListItem
         key={i}
-        title={item.book_name}
+        title={item.SERS_name}
         subtitle={item.reason_to_request}
         titleStyle={{ color: "black", fontWeight: "bold" }}
         leftElement={
@@ -80,14 +80,14 @@ export default class BookDonateScreen extends React.Component {
       <View style={[styles.container, { backgroundColor: "#fff" }]}>
         <MyHeader title="Enter Emergency Details" navigation={this.props.navigation} />
         <View style={styles.container}>
-          {this.state.requestedBooksList.length === 0 ? (
+          {this.state.requestedSERSList.length === 0 ? (
             <View style={styles.subContainer}>
-              <Text style={{ fontSize: 20 }}>List of All Requested Books</Text>
+              <Text style={{ fontSize: 20 }}>List of All Requested SERS</Text>
             </View>
           ) : (
             <FlatList
               keyExtractor={this.keyExtractor}
-              data={this.state.requestedBooksList}
+              data={this.state.requestedSERSList}
               renderItem={this.renderItem}
             />
           )}
