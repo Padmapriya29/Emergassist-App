@@ -13,7 +13,7 @@ import MyHeader from "../components/MyHeader.js";
 import firebase from "firebase";
 import db from "../config.js";
 
-export default class MyDonationScreen extends React.Component {
+export default class History extends React.Component {
   static navigationOptions = { header: null };
   constructor() {
     super();
@@ -55,9 +55,9 @@ export default class MyDonationScreen extends React.Component {
       });
   };
 
-  sendNotification = (bookDetails, requestStatus) => {
-    var requestId = bookDetails.request_id;
-    var donorId = bookDetails.donor_id;
+  sendNotification = (SERSDetails, requestStatus) => {
+    var requestId = SERSDetails.request_id;
+    var donorId = SERSDetails.donor_id;
 
     db.collection("all_notifications")
       .where("request_id", "==", requestId)
@@ -66,11 +66,11 @@ export default class MyDonationScreen extends React.Component {
       .then((snapshot) => {
         snapshot.forEach((doc) => {
           var message = "";
-          if (requestStatus === "Book Sent") {
-            message = this.state.donorName + " sent you book";
+          if (requestStatus === "SERS Sent") {
+            message = this.state.donorName + " sent you SERS";
           } else {
             message =
-              this.state.donorName + " has shown interest in donating the book";
+              this.state.donorName + " has shown interest in donating the SERS";
           }
           db.collection("all_notifications").doc(doc.id).update({
             message: message,
@@ -81,20 +81,20 @@ export default class MyDonationScreen extends React.Component {
       });
   };
 
-  sendBook = (bookDetails) => {
-    console.log(bookDetails);
-    if (bookDetails.request_status === "Book Sent") {
+  sendSERS = (SERSDetails) => {
+    console.log(SERSDetails);
+    if (SERSDetails.request_status === "SERS Sent") {
       var requestStatus = "Donor Interested";
-      db.collection("all_donations").doc(bookDetails.doc_id).update({
+      db.collection("all_donations").doc(SERSDetails.doc_id).update({
         request_status: "Donor Interested",
       });
-      this.sendNotification(bookDetails, requestStatus);
+      this.sendNotification(SERSDetails, requestStatus);
     } else {
-      var requestStatus = "Book Sent";
-      db.collection("all_donations").doc(bookDetails.doc_id).update({
-        request_status: "Book Sent",
+      var requestStatus = "SERS Sent";
+      db.collection("all_donations").doc(SERSDetails.doc_id).update({
+        request_status: "SERS Sent",
       });
-      this.sendNotification(bookDetails, requestStatus);
+      this.sendNotification(SERSDetails, requestStatus);
     }
   };
 
@@ -103,14 +103,14 @@ export default class MyDonationScreen extends React.Component {
   renderItem = ({ item, i }) => (
     <ListItem
       key={i}
-      title={item.book_name}
+      title={item.SERS_name}
       subtitle={
         "Requested By : " +
         item.requested_by +
         "\nStatus : " +
         item.request_status
       }
-      leftElement={<Icon name="book" type="font-awesome" color="#696969" />}
+      leftElement={<Icon name="SERS" type="font-awesome" color="#696969" />}
       titleStyle={{ color: "black", fontWeight: "bold" }}
       rightElement={
         <TouchableOpacity
@@ -118,15 +118,15 @@ export default class MyDonationScreen extends React.Component {
             styles.button,
             {
               backgroundColor:
-                item.request_status === "Book Sent" ? "green" : "#ff5722",
+                item.request_status === "SERS Sent" ? "green" : "#ff5722",
             },
           ]}
           onPress={() => {
-            this.sendBook(item);
+            this.sendSERS(item);
           }}
         >
           <Text style={{ color: "#ffff" }}>
-            {item.request_status === "Book Sent" ? "Book Sent" : "Send Book"}
+            {item.request_status === "SERS Sent" ? "SERS Sent" : "Send SERS"}
           </Text>
         </TouchableOpacity>
       }
@@ -150,7 +150,7 @@ export default class MyDonationScreen extends React.Component {
         <View style={{ flex: 1 }}>
           {this.state.allDonations.length === 0 ? (
             <View style={styles.subtitle}>
-              <Text style={{ fontSize: 20 }}>List of all book Donations</Text>
+              <Text style={{ fontSize: 20 }}>List of all SERS Donations</Text>
             </View>
           ) : (
             <FlatList
