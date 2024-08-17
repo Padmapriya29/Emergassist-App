@@ -2,7 +2,6 @@ import * as React from "react";
 import { Image } from "react-native";
 import { createBottomTabNavigator } from "react-navigation-tabs";
 import { AppStackNavigator } from "./AppStackNavigator";
-import BookRequestScreen from "../screens/BookRequestScreen";
 
 export const AppTabNavigator = createBottomTabNavigator({
   DonateBooks: {
@@ -17,8 +16,8 @@ export const AppTabNavigator = createBottomTabNavigator({
       tabBarLabel: "Donate Books",
     },
   },
-  BookRequest: {
-    screen: BookRequestScreen,
+  SERS: {
+    screen: SERS,
     navigationOptions: {
       tabBarIcon: (
         <Image
@@ -26,8 +25,8 @@ export const AppTabNavigator = createBottomTabNavigator({
           style={{ width: 20, height: 20 }}
         />
       ),
-      tabBarLabel: "Book Request",
+      tabBarLabel: "SERS Request",
     },
   },
 });
-// console.log(app.debug@id:user_name&book_name)
+// console.log(app.debug@id:user_name&Course_name)
