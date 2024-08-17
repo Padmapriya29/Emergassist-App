@@ -4,7 +4,7 @@ import { Card, Header, Icon } from "react-native-elements";
 import firebase from "firebase";
 import db from "../config";
 import { RFValue } from "react-native-responsive-fontsize";
-export default class ReceiverDetailsScreen extends React.Component {
+export default class CPR extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -12,8 +12,8 @@ export default class ReceiverDetailsScreen extends React.Component {
       userName: "",
       receiverId: this.props.navigation.getParam("details")["user_id"],
       requestId: this.props.navigation.getParam("details")["request_id"],
-      bookName: this.props.navigation.getParam("details")["book_name"],
-      bookImage: "#",
+      tut2Name: this.props.navigation.getParam("details")["tut2_name"],
+      tut2Image: "#",
       reasonForRequesting: this.props.navigation.getParam("details")[
         "reason_to_request"
       ],
@@ -51,14 +51,14 @@ export default class ReceiverDetailsScreen extends React.Component {
         });
       });
 
-    db.collection("requested_books")
+    db.collection("requested_tut2s")
       .where("request_id", "==", this.state.requestId)
       .get()
       .then((snapshot) => {
         snapshot.forEach((doc) => {
           this.setState({
             receiverRequestDocId: doc.id,
-            bookImage: doc.data().image_link,
+            tut2Image: doc.data().image_link,
           });
         });
       });
@@ -69,9 +69,9 @@ export default class ReceiverDetailsScreen extends React.Component {
     this.getUserDetails(this.state.userId);
   }
 
-  updateBookStatus = () => {
+  updatetut2Status = () => {
     db.collection("all_donations").add({
-      book_name: this.state.bookName,
+      tut2_name: this.state.tut2Name,
       request_id: this.state.requestId,
       requested_by: this.state.receiverName,
       donor_id: this.state.userId,
@@ -81,12 +81,12 @@ export default class ReceiverDetailsScreen extends React.Component {
 
   addNotification = () => {
     var message =
-      this.state.userName + " has shown interest in donating the book";
+      this.state.userName + " has shown interest in donating the tut2";
     db.collection("all_notifications").add({
       targeted_user_id: this.state.receiverId,
       donor_id: this.state.userId,
       request_id: this.state.requestId,
-      book_name: this.state.bookName,
+      tut2_name: this.state.tut2Name,
       date: firebase.firestore.FieldValue.serverTimestamp(),
       notification_status: "unread",
       message: message,
@@ -107,7 +107,7 @@ export default class ReceiverDetailsScreen extends React.Component {
               />
             }
             centerComponent={{
-              text: "Donate Books",
+              text: "Donate tut2s",
               style: {
                 color: "#ffffff",
                 fontSize: RFValue(20),
@@ -128,7 +128,7 @@ export default class ReceiverDetailsScreen extends React.Component {
           >
             <View style={{ flex: 0.4 }}>
               <Image
-                source={{ uri: this.state.bookImage }}
+                source={{ uri: this.state.tut2Image }}
                 style={{
                   width: "100%",
                   height: "100%",
@@ -150,7 +150,7 @@ export default class ReceiverDetailsScreen extends React.Component {
                   textAlign: "center",
                 }}
               >
-                {this.state.bookName}
+                {this.state.tut2Name}
               </Text>
               <Text
                 style={{
@@ -228,7 +228,7 @@ export default class ReceiverDetailsScreen extends React.Component {
                 <TouchableOpacity
                   style={styles.button}
                   onPress={() => {
-                    this.updateBookStatus();
+                    this.updatetut2Status();
                     this.addNotification();
                     this.props.navigation.navigate("MyDonations");
                   }}
