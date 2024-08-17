@@ -4,7 +4,7 @@ import { Card, Header, Icon } from "react-native-elements";
 import firebase from "firebase";
 import db from "../config";
 import { RFValue } from "react-native-responsive-fontsize";
-export default class ReceiverDetailsScreen extends React.Component {
+export default class MicrolearningTab extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
