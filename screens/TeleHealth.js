@@ -17,26 +17,20 @@ import db from "../config";
 import firebase from "firebase";
 import MyHeader from "../components/MyHeader";
 import { SearchBar, ListItem, Input } from "react-native-elements";
-import { BookSearch } from "react-native-google-books";
+import { SERSSearch } from "react-native-google-SERSs";
 import { RFValue } from "react-native-responsive-fontsize";
 
-export default class BookRequestScreen extends React.Component {
+export default class TeleHealth extends React.Component {
   constructor() {
     super();
     this.state = {
       userId: firebase.auth().currentUser.email,
-      bookName: "",
-      reasonToRequest: "",
-      requestId: "",
-      requestedBookName: "",
-      bookStatus: "",
       docId: "",
       userDocId: "",
       datasource: "",
       showFlatlist: false,
       imageLink: "#",
       requestedImageLink: "",
-      isBookRequestActive: false,
     };
   }
 
@@ -44,24 +38,24 @@ export default class BookRequestScreen extends React.Component {
     return Math.random().toString(36).substring(7);
   };
 
-  addRequest = async (bookName, reasonToRequest) => {
+  addRequest = async (SERSName, reasonToRequest) => {
     var userId = this.state.userId;
     var randomRequestId = this.createUniqueId();
-    var books = await BookSearch.searchbook(
-      bookName,
+    var SERS = await SERSSearch.searchSERS(
+      SERSName,
       "AIzaSyD794MXiXb-AGowFmT_1JZwo8BPJxVTt9s"
     );
-    db.collection("requested_books").add({
+    db.collection("requested_SERSs").add({
       user_id: userId,
-      book_name: bookName,
+      SERS_name: SERSName,
       reason_to_request: reasonToRequest,
       request_id: randomRequestId,
-      book_status: "requested",
+      SERS_status: "requested",
       date: firebase.firestore.FieldValue.serverTimestamp(),
-      image_link: books.data[0].volumeInfo.imageLinks.smallThumbnail,
+      image_link: SERSs.data[0].volumeInfo.imageLinks.smallThumbnail,
     });
 
-    await this.getBookRequest();
+    await this.getSERSRequest();
     db.collection("users")
       .where("username", "==", userId)
       .get()
@@ -69,32 +63,32 @@ export default class BookRequestScreen extends React.Component {
       .then((snapshot) => {
         snapshot.forEach((doc) => {
           db.collection("users").doc(doc.id).update({
-            isBookRequestActive: true,
+            isSERSRequestActive: true,
           });
         });
       });
 
     this.setState({
-      bookName: "",
+      SERSName: "",
       reasonToRequest: "",
       requestId: randomRequestId,
     });
 
-    return Alert.alert("Book Requested Successfully!");
+    return Alert.alert("SERS Requested Successfully!");
   };
 
-  getBookRequest = () => {
-    var bookRequest = db
-      .collection("requested_books")
+  getSERSRequest = () => {
+    var SERSRequest = db
+      .collection("requested_SERSs")
       .where("user_id", "==", this.state.userId)
       .get()
       .then((snapshot) => {
         snapshot.forEach((doc) => {
-          if (doc.data().book_status !== "received") {
+          if (doc.data().SERS_status !== "received") {
             this.setState({
               requestId: doc.data().request_id,
-              requestedBookName: doc.data().book_name,
-              bookStatus: doc.data().book_status,
+              requestedSERSName: doc.data().SERS_name,
+              SERSStatus: doc.data().SERS_status,
               requestedImageLink: doc.data().image_link,
               docId: doc.id,
             });
@@ -102,25 +96,25 @@ export default class BookRequestScreen extends React.Component {
         });
       });
   };
-//console.log(book_name)
+//console.log(SERS_name)
 //console.log(user_id)
-//console.log(book_name)
-  getIsBookRequestActive = () => {
+//console.log(SERS_name)
+  getIsSERSRequestActive = () => {
     db.collection("users")
       .where("username", "==", this.state.userId)
       .onSnapshot((querSnapshot) => {
         querSnapshot.forEach((doc) => {
           this.setState({
-            isBookRequestActive: doc.data().isBookRequestActive,
+            isSERSRequestActive: doc.data().isSERSRequestActive,
             userDocId: doc.id,
           });
         });
       });
   };
 
-  updateBookRequestStatus = () => {
-    db.collection("requested_books").doc(this.state.docId).update({
-      book_status: "received",
+  updateSERSRequestStatus = () => {
+    db.collection("requested_SERSs").doc(this.state.docId).update({
+      SERS_status: "received",
     });
 
     db.collection("users")
@@ -129,7 +123,7 @@ export default class BookRequestScreen extends React.Component {
       .then((snapshot) => {
         snapshot.forEach((doc) => {
           db.collection("users").doc(doc.id).update({
-            isBookRequestActive: false,
+            isSERSRequestActive: false,
           });
         });
       });
@@ -150,14 +144,14 @@ export default class BookRequestScreen extends React.Component {
             .then((snapshot) => {
               snapshot.forEach((doc) => {
                 var donorId = doc.data().donor_id;
-                var bookName = doc.data().book_name;
+                var SERSName = doc.data().SERS_name;
 
                 db.collection("all_notifications").add({
                   targeted_user_id: donorId,
                   message:
-                    name + " " + lastname + " received the book " + bookName,
+                    name + " " + lastname + " received the SERS " + SERSName,
                   notification_status: "unread",
-                  book_name: bookName,
+                  SERS_name: SERSName,
                 });
               });
             });
@@ -165,31 +159,31 @@ export default class BookRequestScreen extends React.Component {
       });
   };
 
-  receivedBooks = (bookName) => {
+  receivedSERSs = (SERSName) => {
     var userId = this.state.userId;
     var requestId = this.state.requestId;
-    db.collection("received_books").add({
+    db.collection("received_SERSs").add({
       user_id: userId,
-      book_name: bookName,
+      SERS_name: SERSName,
       request_id: requestId,
-      book_status: "received",
+      SERS_status: "received",
     });
   };
 
   componentDidMount() {
-    this.getBookRequest();
-    this.getIsBookRequestActive();
+    this.getSERSRequest();
+    this.getIsSERSRequestActive();
   }
 
-  async getBooksFromApi(bookName) {
-    this.setState({ bookName: bookName });
-    if (bookName.length > 2) {
-      var books = await BookSearch.searchbook(
-        bookName,
+  async getSERSsFromApi(SERSName) {
+    this.setState({ SERSName: SERSName });
+    if (SERSName.length > 2) {
+      var SERSs = await SERSSearch.searchSERS(
+        SERSName,
         "AIzaSyD794MXiXb-AGowFmT_1JZwo8BPJxVTt9s"
       );
       this.setState({
-        datasource: books.data,
+        datasource: SERSs.data,
         showFlatlist: true,
       });
     }
@@ -210,7 +204,7 @@ export default class BookRequestScreen extends React.Component {
         onPress={() => {
           this.setState({
             showFlatlist: false,
-            bookName: item.volumeInfo.title,
+            SERSName: item.volumeInfo.title,
           });
         }}
         bottomDivider
@@ -221,12 +215,12 @@ export default class BookRequestScreen extends React.Component {
   };
 
   render() {
-    if (this.state.isBookRequestActive === true) {
+    if (this.state.isSERSRequestActive === true) {
       return (
         //Status screen
         <View style={{ flex: 1 }}>
           <View style={{ flex: 0.1 }}>
-            <MyHeader title="Book Status" navigation={this.props.navigation} />
+            <MyHeader title="SERS Status" navigation={this.props.navigation} />
           </View>
           <View style={styles.imageView}>
             <Image
@@ -234,24 +228,24 @@ export default class BookRequestScreen extends React.Component {
               style={styles.imageStyle}
             />
           </View>
-          <View style={styles.bookstatus}>
-            <Text style={{ fontSize: RFValue(20) }}>Name of the book</Text>
-            <Text style={styles.requestedBookName}>
-              {this.state.requestedBookName}
+          <View style={styles.SERSstatus}>
+            <Text style={{ fontSize: RFValue(20) }}>Name of the SERS</Text>
+            <Text style={styles.requestedSERSName}>
+              {this.state.requestedSERSName}
             </Text>
             <Text style={styles.status}>Status</Text>
-            <Text style={styles.bookStatus}>{this.state.bookStatus}</Text>
+            <Text style={styles.SERSStatus}>{this.state.SERSStatus}</Text>
           </View>
           <View style={styles.buttonView}>
             <TouchableOpacity
               style={styles.button}
               onPress={() => {
                 this.sendNotification();
-                this.updateBookRequestStatus();
-                this.receivedBooks(this.state.requestedBookName);
+                this.updateSERSRequestStatus();
+                this.receivedSERSs(this.state.requestedSERSName);
               }}
             >
-              <Text style={styles.buttontxt}>Book Received</Text>
+              <Text style={styles.buttontxt}>SERS Received</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -260,21 +254,21 @@ export default class BookRequestScreen extends React.Component {
       return (
         <View style={{ flex: 1 }}>
           <View style={{ flex: 0.1 }}>
-            <MyHeader title="Request Book" navigation={this.props.navigation} />
+            <MyHeader title="Request SERS" navigation={this.props.navigation} />
           </View>
           <View style={{ flex: 0.9 }}>
             <Input
               style={styles.formInputText}
-              label={"Book Name"}
-              placeholder="Book name"
+              label={"SERS Name"}
+              placeholder="SERS name"
               containerStyle={{ marginTop: RFValue(60) }}
               onChangeText={(text) => {
-                this.getBooksFromApi(text);
+                this.getSERSsFromApi(text);
               }}
               onClear={(text) => {
-                this.getBooksFromApi("");
+                this.getSERSsFromApi("");
               }}
-              value={this.state.bookName}
+              value={this.state.SERSName}
             />
             {this.state.showFlatlist ? (
               <FlatList
@@ -291,7 +285,7 @@ export default class BookRequestScreen extends React.Component {
                   containerStyle={{ marginTop: RFValue(30) }}
                   multiline={true}
                   numberOfLines={8}
-                  placeholder="Why do you need the book?"
+                  placeholder="Why do you need the SERS?"
                   onChangeText={(text) => {
                     this.setState({ reasonToRequest: text });
                   }}
@@ -301,7 +295,7 @@ export default class BookRequestScreen extends React.Component {
                   style={[styles.button, { marginTop: RFValue(30) }]}
                   onPress={() => {
                     this.addRequest(
-                      this.state.bookName,
+                      this.state.SERSName,
                       this.state.reasonToRequest
                     );
                   }}
@@ -342,11 +336,11 @@ const styles = StyleSheet.create({
     borderWidth: 5,
     borderRadius: RFValue(10),
   },
-  bookstatus: {
+  SERSstatus: {
     flex: 0.4,
     alignItems: "center",
   },
-  requestedBookName: {
+  requestedSERSName: {
     fontSize: RFValue(30),
     fontWeight: "500",
     padding: RFValue(10),
@@ -358,7 +352,7 @@ const styles = StyleSheet.create({
     fontSize: RFValue(20),
     marginTop: RFValue(30),
   },
-  bookStatus: {
+  SERSStatus: {
     fontSize: RFValue(30),
     fontWeight: "bold",
     marginTop: RFValue(10),
